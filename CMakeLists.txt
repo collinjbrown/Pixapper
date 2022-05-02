@@ -11,6 +11,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 set (BASE_SRCS
 	Pixapper.cpp
 	Pixapper.h
+	Setup.h
 	external/lodepng/lodepng.cpp
 	external/lodepng/lodepng.h
 )
