@@ -56,33 +56,55 @@ void MapPNG(Image* source, int cols, int rows, Image* map, string copyPath)
 	int pixelsMapped = 0;			// How many pixels have we mapped in total?
 	int pixelPerMap = cols * rows;	// Maximum source pixels to map to each map pixel.
 
-	int c = 0;						// Active Column
-	int r = 0;						// Active Row
+	int c = source->width / cols;	// Pixels per column.
+	int r = source->height / rows;	// Pixels per row.
+
+	int pixPerCell = c * r;			// Pixels per cell of animation.
 
 	for (int i = 0; i < source->pixels.size(); i++)
 	{
 		pixelsMapped++;
 		Pixel* s = source->pixels[i];
 
-		for (int j = 0; j < map->pixels.size(); j++)
-		{
-			Pixel* m = map->pixels[j];
+		int cellX = floor((s->coord->x - 1) / c) + 1;
+		int cellY = floor((s->coord->y - 1) / r);
 
-			if (m->mappedHere < pixelPerMap)
+		int cell = cellX + (cellY * cols);
+
+		if (s->color->r == 0 &&
+			s->color->g == 0 &&
+			s->color->b == 0 &&
+			s->color->a == 0)
+		{
+			newRaw.push_back(0);
+			newRaw.push_back(0);
+			newRaw.push_back(0);
+			newRaw.push_back(0);
+		}
+		else
+		{
+			for (int j = 0; j < map->pixels.size(); j++)
 			{
-				if (s->color->r == m->color->r &&
-					s->color->g == m->color->g &&
-					s->color->b == m->color->b &&
-					s->color->a == m->color->a)
+				Pixel* m = map->pixels[j];
+
+				if (m->mappedHere < cell)
 				{
-					newRaw.push_back(m->coord->x);
-					newRaw.push_back(0);
-					newRaw.push_back(m->coord->y);
-					newRaw.push_back(0);
-					break;
+					if (s->color->r == m->color->r &&
+						s->color->g == m->color->g &&
+						s->color->b == m->color->b &&
+						s->color->a == m->color->a)
+					{
+						// std::cout << std::to_string(m->coord->x) + " / " + std::to_string(m->coord->y) + "\n";
+
+						m->mappedHere++;
+						newRaw.push_back(m->coord->x);
+						newRaw.push_back(-(m->coord->y + 1) + map->height);
+						newRaw.push_back(0);
+						newRaw.push_back(255);
+						break;
+					}
 				}
 			}
-
 		}
 	}
 
@@ -90,7 +112,7 @@ void MapPNG(Image* source, int cols, int rows, Image* map, string copyPath)
 
 	if (error)
 	{
-		std::cout << "Error decoding file: " << error << ": " << lodepng_error_text(error) << std::endl;
+		std::cout << "Error encoding file: " << error << ": " << lodepng_error_text(error) << std::endl;
 	}
 
 	return;
@@ -115,15 +137,15 @@ int main()
 		cin >> sourcePath;
 		cout << "You entered: " + sourcePath + "\n";
 		cout << "Is this correct?\n";
-		cout << "y / N\n";
+		cout << "Y / n\n";
 		string resp;
 		cin >> resp;
 
-		if (resp == "N")
+		if (resp == "n")
 		{
 			// Cycle Again
 		}
-		else
+		else if (resp== "Y")
 		{
 			break;
 		}
@@ -139,15 +161,15 @@ int main()
 		cin >> sourceRows;
 		cout << "You entered: " + std::to_string(sourceColumns) + " columns & " + std::to_string(sourceRows) + " rows.\n";
 		cout << "Is this correct?\n";
-		cout << "y / N\n";
+		cout << "Y / n\n";
 		string resp;
 		cin >> resp;
 
-		if (resp == "N")
+		if (resp == "n")
 		{
 			// Cycle Again
 		}
-		else
+		else if (resp == "Y")
 		{
 			break;
 		}
@@ -160,15 +182,15 @@ int main()
 		cin >> mapPath;
 		cout << "You entered: " + mapPath + "\n";
 		cout << "Is this correct?\n";
-		cout << "y / N\n";
+		cout << "Y / n\n";
 		string resp;
 		cin >> resp;
 
-		if (resp == "N")
+		if (resp == "n")
 		{
 			// Cycle Again
 		}
-		else
+		else if (resp == "Y")
 		{
 			break;
 		}
@@ -214,7 +236,7 @@ int main()
 		std::cout << std::to_string(source->pixels[i]->color->r) + "\n";
 	}*/
 
-	std::cout << "We have liftoff.\n";
+	std::cout << "Your mapped file has been saved in the -copy.png next to your source file.\n";
 
 	string copyOutput;
 	for (int i = 0; i < sourcePath.length() - 4; i++)
