@@ -242,13 +242,6 @@ int main()
 	// the "same pixel" in one frame is mapped to the same pixel as in
 	// the other frames.
 
-	/*for (int i = 0; i < source->pixels.size(); i++)
-	{
-		std::cout << std::to_string(source->pixels[i]->color->r) + "\n";
-	}*/
-
-	std::cout << "Your mapped file has been saved in the -copy.png next to your source file.\n";
-
 	string copyOutput;
 	for (int i = 0; i < sourcePath.length() - 4; i++)
 	{
@@ -262,6 +255,7 @@ int main()
 	}
 
 	MapPNG(source, sourceColumns, sourceRows, map, copyOutput);
+	std::cout << "Your mapped file has been saved in the -copy.png next to your source file.\n";
 
 	return 0;
 }
