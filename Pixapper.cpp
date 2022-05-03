@@ -66,15 +66,12 @@ void MapPNG(Image* source, int cols, int rows, Image* map, string copyPath)
 		pixelsMapped++;
 		Pixel* s = source->pixels[i];
 
-		int cellX = floor((s->coord->x - 1) / c) + 1;
+		int cellX = floor((s->coord->x - 1) / c);
 		int cellY = floor((s->coord->y - 1) / r);
 
-		int cell = cellX + (cellY * cols);
+		s->cell = cellX + (cellY * cols);
 
-		if (s->color->r == 0 &&
-			s->color->g == 0 &&
-			s->color->b == 0 &&
-			s->color->a == 0)
+		if (s->color->a == 0)
 		{
 			newRaw.push_back(0);
 			newRaw.push_back(0);
@@ -83,27 +80,41 @@ void MapPNG(Image* source, int cols, int rows, Image* map, string copyPath)
 		}
 		else
 		{
+			bool mapped = false;
+
 			for (int j = 0; j < map->pixels.size(); j++)
 			{
 				Pixel* m = map->pixels[j];
 
-				if (m->mappedHere < cell)
-				{
-					if (s->color->r == m->color->r &&
-						s->color->g == m->color->g &&
-						s->color->b == m->color->b &&
-						s->color->a == m->color->a)
-					{
-						// std::cout << std::to_string(m->coord->x) + " / " + std::to_string(m->coord->y) + "\n";
+				bool taken = false;
 
-						m->mappedHere++;
-						newRaw.push_back(m->coord->x);
-						newRaw.push_back(-(m->coord->y + 1) + map->height);
-						newRaw.push_back(0);
-						newRaw.push_back(255);
-						break;
+				for (int l = 0; l < m->pixelsMappedHere.size(); l++)
+				{
+					if (m->pixelsMappedHere[l]->cell == s->cell)
+					{
+						taken = true;
 					}
 				}
+
+				if (!taken &&
+					s->color->r == m->color->r &&
+					s->color->g == m->color->g &&
+					s->color->b == m->color->b &&
+					s->color->a == m->color->a)
+				{
+					mapped = true;
+					m->pixelsMappedHere.push_back(s);
+					newRaw.push_back(m->coord->x);
+					newRaw.push_back(-(m->coord->y + 1) + map->height);
+					newRaw.push_back(0);
+					newRaw.push_back(255);
+					break;
+				}
+			}
+
+			if (!mapped)
+			{
+				std::cout << std::to_string(s->color->r) + " / " + std::to_string(s->color->g) + " / " + std::to_string(s->color->b) + " / " + std::to_string(s->color->a) + "\n";
 			}
 		}
 	}

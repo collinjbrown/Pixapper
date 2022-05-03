@@ -38,11 +38,12 @@ struct Pixel
 	Coord* coord;
 	Color* color;
 
-	int mappedHere;
+	int cell;
+	std::vector<Pixel*> pixelsMappedHere;
 
 	Pixel(Coord* coord, Color* color)
 	{
-		mappedHere = 0;
+		cell = 0;
 		this->coord = coord;
 		this->color = color;
 	}
